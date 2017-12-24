@@ -9,6 +9,7 @@ This project includes a [[Tensorflow](https://github.com/tensorflow/tensorflow)]
 
 [Write the descriptions of your project here, including the problem that we are interested in, the high-level idea of the proposed method, the datasets, etc.]
 SeqGAN adapts GAN for sequential generation. It regards the generator as a policy in reinforcement learning and the discriminator is trained to provide the reward. To evaluate unfinished sequences, Monto-Carlo search is also applied to sample the complete sequences.
+One thing to notice is that SeqGAN doesn't sample a noise code but includes the variance by randomly selecting tokens during the generation.
 
 <p align="center">
     <img src="https://github.com/LantaoYu/SeqGAN/raw/master/figures/seqgan.png">
