@@ -1,5 +1,9 @@
 test.py
 
 *.swp
+*.npy
 *.pyc
 env/
+data/
+others/
+tensorboard/

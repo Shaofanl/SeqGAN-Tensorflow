@@ -99,12 +99,17 @@ def highway(input, size, num_layers=1, bias=-2.0,
         where g is nonlinearity, t is transform gate, and (1-t) is carry gate.
     """
     with tf.variable_scope(scope):
+        size = int(size)
         for idx in range(num_layers):
-            g = f(slim.linear(input, size, scope='highway_lin_%d' % idx,
-                              activation_fn=None))
+            print input
+            g = f(slim.fully_connected(
+                input, size,
+                scope='highway_lin_%d' % idx,
+                activation_fn=None))
 
-            t = tf.sigmoid(slim.linear(
-                input, size, scope='highway_gate_%d' % idx,
+            t = tf.sigmoid(slim.fully_connected(
+                input, size,
+                scope='highway_gate_%d' % idx,
                 activation_fn=None) + bias)
 
             output = t * g + (1. - t) * input

@@ -1,17 +1,18 @@
 import tensorflow as tf
-from SeqGAN.common import highway
+from .common import highway
 
 
 # following https://github.com/LantaoYu/SeqGAN/blob/master/discriminator.py
 class Discriminator(object):
     def __init__(
-            self, seq_len, vocab_size,
+            self,
+            batch_size, seq_len, vocab_size,
             emb_size, filter_sizes, num_filters, l2_reg_lambda=0.0):
         # Placeholders for input, output and dropout
         input_x = tf.placeholder(
-            tf.int32, [None, seq_len], name="input_x")
+            tf.int32, [batch_size, seq_len], name="input_x")
         input_y = tf.placeholder(
-            tf.float32, [None, 2], name="input_y")
+            tf.int32, [batch_size], name="input_y")
         dropout_keep_prob = tf.placeholder(
             tf.float32, name="dropout_keep_prob")
 
@@ -76,17 +77,18 @@ class Discriminator(object):
                 l2_loss += tf.nn.l2_loss(W)
                 l2_loss += tf.nn.l2_loss(b)
                 scores = tf.nn.xw_plus_b(h_drop, W, b, name="scores")
+                truth_prob = tf.nn.softmax(scores, -1)[:, 1]
                 predictions = tf.argmax(scores, 1, name="predictions")
 
             # CalculateMean cross-entropy loss
             with tf.name_scope("loss"):
-                losses = tf.nn.softmax_cross_entropy_with_logits(
+                losses = tf.nn.sparse_softmax_cross_entropy_with_logits(
                     logits=scores, labels=input_y)
                 loss = tf.reduce_mean(losses) + l2_reg_lambda * l2_loss
 
             with tf.name_scope("accuracy"):
                 acc = tf.reduce_mean(tf.to_float(
-                    tf.equal(predictions, tf.argmax(input_y, 1))))
+                    tf.equal(tf.cast(predictions, tf.int32), input_y)))
 
         d_opt = tf.train.AdamOptimizer(1e-4)
         train_op = tf.contrib.slim.learning.create_train_op(
@@ -102,11 +104,17 @@ class Discriminator(object):
         self.dropout_keep_prob = dropout_keep_prob
         self.train_op = train_op
         self.predictions = predictions
+        self.truth_prob = truth_prob
 
     def predict(self, sess, input_x):
         feed_dict = {self.input_x: input_x,
                      self.dropout_keep_prob: 1.0}
         return sess.run(self.predictions, feed_dict=feed_dict)
+
+    def get_truth_prob(self, sess, input_x):
+        feed_dict = {self.input_x: input_x,
+                     self.dropout_keep_prob: 1.0}
+        return sess.run(self.truth_prob, feed_dict=feed_dict)
 
     def train(self, sess, input_x, input_y, dropout_keep_prob=0.75):
         feed_dict = {self.input_x: input_x,

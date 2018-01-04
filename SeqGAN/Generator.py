@@ -1,20 +1,24 @@
+import numpy as np
 import tensorflow as tf
 from tensorflow.contrib import rnn, seq2seq, slim
-from SeqGAN.common import ThresholdHelper
+from .common import ThresholdHelper
 
 
 class Generator(object):
     def __init__(
         self,
-        vocab_size,
         batch_size,
+        seq_len,
+        vocab_size,
         emb_dim,
         hidden_dim,
-        seq_len,
         start_token,
         pretrain_learning_rate=0.01,
         grad_clip=5.0
     ):
+        self.seq_len = seq_len
+        self.batch_size = batch_size
+
         given_tokens = tf.placeholder(
             tf.int32, shape=[batch_size, seq_len], name='given_tokens')
         start_tokens = tf.Variable(
@@ -92,7 +96,7 @@ class Generator(object):
                                  name="rewards")
         g_seq = self.output_ids[seq_len]  # follow the generated one
         g_prob = self.output_probs[seq_len]
-        g_loss = tf.reduce_mean(
+        g_loss = -tf.reduce_mean(
             tf.reduce_sum(tf.one_hot(g_seq, vocab_size) * tf.log(g_prob), -1) *
             rewards
         )
@@ -100,11 +104,24 @@ class Generator(object):
             learning_rate=pretrain_learning_rate)
         g_op = slim.learning.create_train_op(
             g_loss, g_optimizer, clip_gradient_norm=5.0)
-        g_summary = tf.summary.scalar("g_loss", g_loss)
+        g_summary = tf.summary.merge([
+            tf.summary.scalar("g_loss", g_loss),
+            tf.summary.scalar("g_reward", tf.reduce_mean(rewards))
+        ])
 
         self.rewards = rewards
         self.g_op = g_op
         self.g_summary = g_summary
+        self.image_summary = tf.summary.merge([
+            tf.summary.image(
+                "real_samples",
+                tf.expand_dims(tf.one_hot(given_tokens, vocab_size), -1)
+            ),
+            tf.summary.image(
+                "fake_samples",
+                tf.expand_dims(tf.one_hot(output_ids[0], vocab_size), -1)
+            ),
+        ])
 
     def generate(self, sess):
         return sess.run(self.output_ids[0])
@@ -130,3 +147,15 @@ class Generator(object):
         _, summary = sess.run([self.g_op, self.g_summary],
                               feed_dict=feed_dict)
         return summary
+
+    def get_reward(self, sess, given_tokens, rollout_num, discriminator):
+        rewards = np.zeros((self.batch_size, self.seq_len))
+        for keep_num in range(1, self.seq_len):
+            for i in range(rollout_num):
+                # Markov Chain Sample
+                mc_sample = self.rollout(
+                    sess, given_tokens, keep_steps=keep_num)
+                rewards[:, keep_num] += discriminator.\
+                    get_truth_prob(sess, mc_sample)
+        rewards /= rollout_num
+        return rewards
