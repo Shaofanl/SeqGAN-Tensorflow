@@ -1,5 +1,6 @@
 test.py
 
+*.mid
 *.swp
 *.npy
 *.pyc

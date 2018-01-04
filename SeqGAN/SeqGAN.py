@@ -14,14 +14,14 @@ class SeqGAN(object):
         seq_len,
         vocab_size,
         start_token,
-        # g
+        # generator
         g_emb_dim,
         g_hidden_dim,
-        # d
+        # discriminator
         d_emb_dim,
         d_filter_sizes,
         d_num_filters,
-        #
+        # others
         log_generation
     ):
         self.generator = Generator(
@@ -43,6 +43,7 @@ class SeqGAN(object):
         self.log_generation = log_generation
 
     def train(self, sampler,
+              evaluator=None, evaluate=False,
               total_epochs=200,
               pretrain_g_epochs=120,
               pretrain_d_epochs=50,
@@ -64,8 +65,11 @@ class SeqGAN(object):
                 summary = gen.pretrain(sess, sampler(batch_size))
                 writer.add_summary(summary, epoch)
 
+                if evaluate and evaluator is not None:
+                    evaluator(gen.generate(sess))
+
             # TODO: the rollout in the original code uses a update_rate
-            # don't know its purpose
+            # dont know the purpose
 
             print 'pretraining Discriminator ...'
             for epoch in range(pretrain_d_epochs):
@@ -84,14 +88,14 @@ class SeqGAN(object):
                 print 'epoch', epoch
                 for _ in range(1):
                     fake_samples = gen.generate(sess)
-                    rewards = gen.get_reward(sess, fake_samples, 8, dis)
+                    rewards = gen.get_reward(sess, fake_samples, 16, dis)
                     summary = gen.train(sess, fake_samples, rewards)
-                    np.set_printoptions(linewidth=np.inf,
-                                        precision=3)
-                    print rewards.mean(0)
+                    # np.set_printoptions(linewidth=np.inf,
+                    #                     precision=3)
+                    # print rewards.mean(0)
                 writer.add_summary(summary, epoch)
 
-                for _ in range(2):
+                for _ in range(5):
                     fake_samples = gen.generate(sess)
                     real_samples = sampler(batch_size)
                     samples = np.concatenate([fake_samples, real_samples])
@@ -109,5 +113,8 @@ class SeqGAN(object):
                         gen.image_summary,
                         feed_dict={gen.given_tokens: real_samples})
                     writer.add_summary(summary, epoch)
+
+                if evaluate and evaluator is not None:
+                    evaluator(gen.generate(sess))
 
                 np.save('generation', gen.generate(sess))
