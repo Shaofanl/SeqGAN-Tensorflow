@@ -94,7 +94,7 @@ class LSTMDataloader(Dataloader):
     def __init__(
         self,
         batch_size,
-        seq_len=20, vocab_size=10, start_token=0,
+        seq_len=20, vocab_size=5000, start_token=0,
     ):
         self.seq_len = seq_len
         self.vocab_size = vocab_size

@@ -45,7 +45,7 @@ class SeqGAN(object):
     def train(self, sampler,
               evaluator=None, evaluate=False,
               total_epochs=200,
-              pretrain_g_epochs=120,
+              pretrain_g_epochs=1000,
               pretrain_d_epochs=50,
               tensorboard_dir='tensorboard/'):
         if os.path.exists:
