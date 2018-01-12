@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 from tensorflow.contrib import rnn, seq2seq, slim
-from .common import ThresholdHelper
+from .common import ThresholdHelper, safe_log
 
 
 class Generator(object):
@@ -13,7 +13,7 @@ class Generator(object):
         emb_dim,
         hidden_dim,
         start_token,
-        pretrain_learning_rate=0.01,
+        learning_rate=0.01,
         grad_clip=5.0
     ):
         self.seq_len = seq_len
@@ -76,12 +76,12 @@ class Generator(object):
         self.given_tokens = given_tokens
 
         # pretrain
-        logit = tf.log(self.output_probs[seq_len])
+        logit = safe_log(self.output_probs[seq_len])
         pretrain_loss = tf.reduce_mean(
             tf.nn.sparse_softmax_cross_entropy_with_logits(
                 labels=given_tokens, logits=logit))
         pretrain_optimizer = tf.train.AdamOptimizer(
-            learning_rate=pretrain_learning_rate)
+            learning_rate=learning_rate)
         pretrain_op = slim.learning.create_train_op(
             pretrain_loss, pretrain_optimizer, clip_gradient_norm=5.0)
 
@@ -97,11 +97,11 @@ class Generator(object):
         g_seq = self.output_ids[seq_len]  # follow the generated one
         g_prob = self.output_probs[seq_len]
         g_loss = -tf.reduce_mean(
-            tf.reduce_sum(tf.one_hot(g_seq, vocab_size) * tf.log(g_prob), -1) *
+            tf.reduce_sum(tf.one_hot(g_seq, vocab_size) * safe_log(g_prob), -1) *
             rewards
         )
         g_optimizer = tf.train.AdamOptimizer(
-            learning_rate=pretrain_learning_rate)
+            learning_rate=learning_rate)
         g_op = slim.learning.create_train_op(
             g_loss, g_optimizer, clip_gradient_norm=5.0)
         g_summary = tf.summary.merge([

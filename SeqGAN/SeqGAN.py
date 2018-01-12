@@ -48,9 +48,9 @@ class SeqGAN(object):
               pretrain_g_epochs=1000,
               pretrain_d_epochs=50,
               tensorboard_dir='tensorboard/'):
-        if os.path.exists:
-            shutil.rmtree(tensorboard_dir)
-        os.mkdir(tensorboard_dir)
+        # if os.path.exists(tensorboard_dir):
+        #     shutil.rmtree(tensorboard_dir)
+        # os.mkdir(tensorboard_dir)
 
         gen, dis = self.generator, self.discriminator
         batch_size = gen.batch_size
@@ -62,14 +62,12 @@ class SeqGAN(object):
 
             print 'pretraining Generator ...'
             for epoch in range(pretrain_g_epochs):
+                print 'pretrain g epoch', epoch
                 summary = gen.pretrain(sess, sampler(batch_size))
                 writer.add_summary(summary, epoch)
 
                 if evaluate and evaluator is not None:
-                    evaluator(gen.generate(sess))
-
-            # TODO: the rollout in the original code uses a update_rate
-            # dont know the purpose
+                    evaluator(gen.generate(sess), epoch)
 
             print 'pretraining Discriminator ...'
             for epoch in range(pretrain_d_epochs):
@@ -115,6 +113,6 @@ class SeqGAN(object):
                     writer.add_summary(summary, epoch)
 
                 if evaluate and evaluator is not None:
-                    evaluator(gen.generate(sess))
+                    evaluator(gen.generate(sess), pretrain_g_epochs+epoch)
 
                 np.save('generation', gen.generate(sess))

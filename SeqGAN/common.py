@@ -115,3 +115,6 @@ def highway(input, size, num_layers=1, bias=-2.0,
             output = t * g + (1. - t) * input
             input = output
     return output
+
+def safe_log(x):
+    return tf.log(tf.clip_by_value(x, 1e-8, 1-1e-8))

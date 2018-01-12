@@ -9,15 +9,18 @@ def argsparser():
     parser.add_argument('--seed', type=int, default=1)
     parser.add_argument('--is_train', type=bool, default=True)
     parser.add_argument('--evaluate', type=bool, default=True)
+    parser.add_argument('--pretrain_g_epochs', type=int, default=1000)
     parser.add_argument('--log_generation', type=bool, default=False)
     parser.add_argument('--total_epochs', type=int, default=1000)
+    parser.add_argument('--log_dir', type=str, default='logs/train/')
+    parser.add_argument('--eval_log_dir', type=str, default='logs/eval/')
     # Dataset
     parser.add_argument('--dataset', choices=['LSTM', 'Nottingham'], default='LSTM')  # 'Nottingham')
     parser.add_argument('--batch_size', type=int, default=32)
     # SeqGAN
     # Generator
     parser.add_argument('--g_emb_dim', type=int, default=32)
-    parser.add_argument('--g_hidden_dim', type=int, default=32)
+    parser.add_argument('--g_hidden_dim', type=int, default=50)
     # Discriminator
     parser.add_argument('--d_emb_dim', type=int, default=32)
     args = parser.parse_args()
@@ -27,7 +30,7 @@ def argsparser():
 def main(args):
     np.random.seed(args.seed)
     if args.dataset == 'LSTM':
-        args = LSTMDataloader(args.batch_size).export(args)
+        args = LSTMDataloader(args.batch_size, log_dir=args.eval_log_dir).export(args)
     elif args.dataset == 'Nottingham':
         args = NottinghamDataloader().export(args)
 
@@ -49,7 +52,10 @@ def main(args):
     if args.is_train:
         model.train(sampler=args.sampler,
                     evaluator=args.evaluator,
-                    evaluate=args.evaluate)
+                    evaluate=args.evaluate,
+                    total_epochs=args.total_epochs,
+                    pretrain_g_epochs=args.pretrain_g_epochs,
+                    tensorboard_dir=args.log_dir)
 
 
 if __name__ == '__main__':

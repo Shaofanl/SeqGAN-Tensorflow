@@ -1,6 +1,8 @@
 import abc
 import numpy as np
 import os
+import tensorflow as tf
+from SeqGAN.common import safe_log
 
 
 class Dataloader(object):
@@ -95,14 +97,18 @@ class LSTMDataloader(Dataloader):
         self,
         batch_size,
         seq_len=20, vocab_size=5000, start_token=0,
+        seed=32,
+        log_dir='nll_log'
     ):
+        np.random.seed(seed)
+        tf.set_random_seed(seed)
+
         self.seq_len = seq_len
         self.vocab_size = vocab_size
         self.start_token = start_token
         self.batch_size = batch_size
 
         # model
-        import tensorflow as tf
         from tensorflow.contrib import rnn, seq2seq
         from SeqGAN.common import ThresholdHelper
         RNN = rnn.LSTMCell(50)
@@ -151,26 +157,33 @@ class LSTMDataloader(Dataloader):
                          decision_W,
                          axes=[[2], [0]]) +
             decision_b[None, None, :])
-        nll = -tf.reduce_mean(tf.reduce_sum(tf.reduce_sum(
+        nll = -tf.reduce_mean(tf.reduce_mean(tf.reduce_sum(
             tf.one_hot(given_tokens, vocab_size) *
-            tf.log(evaluation_prob),
+            safe_log(evaluation_prob),
             -1)))
 
         self.fake_seq = generation_output.sample_id
         self.given_tokens = given_tokens
         self.nll = nll
 
+        self.writer = tf.summary.FileWriter(log_dir)
+
     def sample(self, batch_size):
         return self.fake_seq.eval()
 
-    def evaluate(self, fake_seqs):
+    def evaluate(self, fake_seqs, iteration=None):
         nlls = 0.
         nb_batch = len(fake_seqs)/self.batch_size
         for i in xrange(nb_batch):
             nlls += self.nll.eval({
                 self.given_tokens: fake_seqs[i*self.batch_size:
                                              (i+1)*self.batch_size]})
-        print 'nll:', nlls/nb_batch
+        nll = nlls/nb_batch
+        print 'nll:', nll
+        self.writer.add_summary(
+                tf.Summary(value=[
+                    tf.Summary.Value(tag='nll', simple_value=nll),]),
+                iteration)
 
     def export(self, args):
         args.seq_len = self.seq_len

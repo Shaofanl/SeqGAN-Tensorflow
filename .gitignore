@@ -8,3 +8,5 @@ env/
 data/
 others/
 tensorboard/
+nll_log/
+logs/
