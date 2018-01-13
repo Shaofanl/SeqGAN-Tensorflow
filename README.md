@@ -45,11 +45,7 @@ We use the advanced (decoder) APIs provided by the [tensorflow.contribs.seq2seq]
 <p align="center">
     <img src="figures/SeqGAN.png">
 </p>
-
-After using SeqGAN's loss, the Negative Log Likelihood drops and converges to a smaller loss, which indicates that the generated sequences match the distribution of the randomly intialized LSTM better. 
-
-
-[Show results here. It can includes training curves, training time, training accuracy, testing accuracy, generated images, etc.]
+In this figure, the blue line is Negative Log Likelihood(NLL) of purely using supervised learning (MLE loss) to train the generator, while the orange one is first using MLE to pretrain and then optimizing the adversarial loss. Two curves overlap with each other at the beginning since the same random seed is used.  After using SeqGAN's loss, the NLL drops and converges to a smaller loss, which indicates that the generated sequences match the distribution of the randomly intialized LSTM better. 
 
 ## Related works
 
