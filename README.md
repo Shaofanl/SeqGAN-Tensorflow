@@ -31,11 +31,14 @@ We use the advanced (decoder) APIs provided by the [tensorflow.contribs.seq2seq]
 ### Training
 
 - Run `bash pure_pretrain.sh` to have a baseline that is trained with pure MLE loss for 2000 iterations.
-- Run `bash pretrain_n_seqgan.sh` to train the mode with 1000 iterations of pretraining with MLE and another 1000 iterations with the loss SeqGAN proposed.
+- Run `bash pretrain_n_seqgan.sh` to train the model with 1000 iterations of pretraining with MLE and another 1000 iterations with the loss SeqGAN proposed.
 
 ### Testing
 
 - Run `tensorboard --logdir logs/eval/` and open your browser to check the improvement that SeqGAN provided.
+
+### Music generation
+- Run `bash train_nottingham.sh` to train the model. Check data/Nottingham/\*.mid for generations. The songs will be updated every 100 epochs.
 
 ## Results
 

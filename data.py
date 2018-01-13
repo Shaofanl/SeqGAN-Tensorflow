@@ -58,30 +58,32 @@ class NottinghamDataloader(Dataloader):
         x = np.array(x)
         return x
 
-    def evaluate(self, fake_seqs):
-        # generate a midi file from sequences
-        import pretty_midi
-        song = pretty_midi.PrettyMIDI()
-        piano_program = pretty_midi.\
-            instrument_name_to_program('Acoustic Grand Piano')
-        piano = pretty_midi.Instrument(program=piano_program)
+    def evaluate(self, fake_seqs, iteration=None):
+        if iteration % 100 == 0:
+            # generate a midi file from sequences every 100 iteartions
+            import pretty_midi
+            song = pretty_midi.PrettyMIDI()
+            piano_program = pretty_midi.\
+                instrument_name_to_program('Acoustic Grand Piano')
+            piano = pretty_midi.Instrument(program=piano_program)
 
-        span = .2
-        last_note = None
-        for song_ind, fake_seq in enumerate(fake_seqs):
-            for ind, note in enumerate(fake_seq):
-                if note == 0:
-                    continue
-                if note == last_note:
-                    start = piano.notes.pop(-1).start
-                else:
-                    start = ind*span
-                note = pretty_midi.Note(
-                    velocity=100, pitch=note+19, start=start, end=(ind+1)*span)
-                piano.notes.append(note)
+            span = .2
+            last_note = None
+            for song_ind, fake_seq in enumerate(fake_seqs):
+                for ind, note in enumerate(fake_seq):
+                    if note == 0:
+                        continue
+                    if note == last_note:
+                        start = piano.notes.pop(-1).start
+                    else:
+                        start = ind*span
+                    note = pretty_midi.Note(
+                        velocity=100, pitch=note+19, start=start, end=(ind+1)*span)
+                    piano.notes.append(note)
 
-            song.instruments.append(piano)
-            song.write('others/sample{}.mid'.format(song_ind))
+                song.instruments.append(piano)
+                song.write('data/Nottingham/sample{}.mid'.format(song_ind))
+            print 'Updated songs to `data/Nottingham/`' 
 
     def export(self, args):
         args.seq_len = self.seq_len
@@ -180,6 +182,7 @@ class LSTMDataloader(Dataloader):
                                              (i+1)*self.batch_size]})
         nll = nlls/nb_batch
         print 'nll:', nll
+
         self.writer.add_summary(
                 tf.Summary(value=[
                     tf.Summary.Value(tag='nll', simple_value=nll),]),
