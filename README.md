@@ -39,6 +39,7 @@ to have a baseline that is trained with pure MLE loss for 2000 iterations.
 ```
 python2 main.py --pretrain_g_epochs 1000 --total_epochs 1000 --log_dir logs/train/pretrain_n_seqgan  --eval_log_dir logs/eval/with_seqgan
 ```
+to train the model with first pretraining loss and then SeqGAN's loss.
 - Run 
 ```
 tensorboard --logdir logs/eval/
