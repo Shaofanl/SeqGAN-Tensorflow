@@ -16,6 +16,9 @@ class Generator(object):
         learning_rate=0.01,
         grad_clip=5.0
     ):
+        '''
+            please check SeqGAN.py for the definition of arguments
+        '''
         self.seq_len = seq_len
         self.batch_size = batch_size
 

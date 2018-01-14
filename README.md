@@ -2,7 +2,7 @@
 
 As part of the implementation series of [Joseph Lim's group at USC](http://csail.mit.edu/~lim), our motivation is to accelerate (or sometimes delay) research in the AI community by promoting open-source projects. To this end, we implement state-of-the-art research papers, and publicly share them with concise reports. Please visit our [group github site](https://github.com/gitlimlab) for other projects.
 
-This project is implemented by [Shaofan Lai](https://github.com/shaofanl) and reviewed by [Reviewer's name](Reviewer's url).
+This project is implemented by [Shaofan Lai](https://github.com/shaofanl) and reviewed by [Shao-Hua Sun](https://github.com/shaohua0116).
 
 ## Descriptions
 This project includes a [[Tensorflow](https://github.com/tensorflow/tensorflow)] implementation of **SeqGAN** proposed in the paper [[SeqGAN: Sequence Generative Adversarial Nets with Policy Gradient](https://arxiv.org/abs/1609.05473)] by Lantao Yu et al. at Shanghai Jiao Tong University and University College London.
@@ -28,16 +28,14 @@ We use the advanced (decoder) APIs provided by the [tensorflow.contribs.seq2seq]
 - A randomly initialized LSTM is used to simulate a specific distribution.
 - A music dataset contains multiple Nottingham Songs.
 
-### Training
+### Training LSTM 
 
-- Run `bash pure_pretrain.sh` to have a baseline that is trained with pure MLE loss for 2000 iterations.
-- Run `bash pretrain_n_seqgan.sh` to train the model with 1000 iterations of pretraining with MLE and another 1000 iterations with the loss SeqGAN proposed.
-
-### Testing
-
+- Run `python2 main.py --pretrain_g_epochs 2000 --total_epochs 0 --log_dir logs/train/pure_pretrain --eval_log_dir logs/eval/pure_pretrain` to have a baseline that is trained with pure MLE loss for 2000 iterations.
+- Run `python2 main.py --pretrain_g_epochs 1000 --total_epochs 1000 --log_dir logs/train/pretrain_n_seqgan  --eval_log_dir logs/eval/with_seqgan`
 - Run `tensorboard --logdir logs/eval/` and open your browser to check the improvement that SeqGAN provided.
 
 ### Music generation
+
 - Run `bash train_nottingham.sh` to train the model. Check data/Nottingham/\*.mid for generations. The songs will be updated every 100 epochs.
 
 ## Results

@@ -24,6 +24,26 @@ class SeqGAN(object):
         # others
         log_generation
     ):
+    '''
+        # general
+        batch_size: batch size of training
+        seq_len: the length of the generated sequence
+        vocab_size: the number of tokens
+        start_token: the index for <start> in NLP
+
+        # generator related
+        g_emb_dim: the size of the embedding space
+        g_hidden_dim: the number of the hidden cells in LSTM 
+
+        # discriminator related
+        d_emb_dim: the size of the embedding space
+        d_filter_sizes: the size of the filters (CNN)
+        d_num_filters: the number of the filters (CNN)
+
+        # others
+        log_generation: whether to log the generation as
+            an image in the tensorboard
+    '''
         self.generator = Generator(
             batch_size=batch_size,
             seq_len=seq_len,
@@ -48,6 +68,21 @@ class SeqGAN(object):
               pretrain_g_epochs=1000,
               pretrain_d_epochs=50,
               tensorboard_dir='tensorboard/'):
+    '''
+        sampler: a function to sample given batch_size
+
+        evaluator: a function to evaluate given the
+            generation and the index of epoch
+        evaluate: a bool function whether to evaluate
+            while training
+
+        total_epochs: number of the epochs
+        pretrain_g_epochs: number of the pretraining epoch
+            of the generator with MLE loss (supervised learning)
+        pretrain_d_epochs: number of the pretraining epoch
+            of the discriminator
+    '''
+
         # if os.path.exists(tensorboard_dir):
         #     shutil.rmtree(tensorboard_dir)
         # os.mkdir(tensorboard_dir)

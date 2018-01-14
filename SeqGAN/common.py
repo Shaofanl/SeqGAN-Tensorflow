@@ -33,8 +33,7 @@ class ThresholdHelper(Helper):
             self._embedding_fn = (
                 lambda ids: tf.nn.embedding_lookup(embedding, ids))
 
-        self._given_tokens = tf.convert_to_tensor(
-            given_tokens, dtype=tf.int32, name="given_input")
+        self._given_tokens = tf.convert_to_tensor( given_tokens, dtype=tf.int32, name="given_input")
         self._given_emb = self._embedding_fn(self._given_tokens)
 
         self._start_tokens = tf.convert_to_tensor(

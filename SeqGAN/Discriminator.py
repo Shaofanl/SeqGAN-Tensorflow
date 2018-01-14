@@ -8,6 +8,9 @@ class Discriminator(object):
             self,
             batch_size, seq_len, vocab_size,
             emb_size, filter_sizes, num_filters, l2_reg_lambda=0.0):
+        '''
+            please check SeqGAN.py for the definition of arguments
+        '''
         # Placeholders for input, output and dropout
         input_x = tf.placeholder(
             tf.int32, [batch_size, seq_len], name="input_x")
