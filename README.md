@@ -30,9 +30,20 @@ We use the advanced (decoder) APIs provided by the [tensorflow.contribs.seq2seq]
 
 ### Training LSTM 
 
-- Run `python2 main.py --pretrain_g_epochs 2000 --total_epochs 0 --log_dir logs/train/pure_pretrain --eval_log_dir logs/eval/pure_pretrain` to have a baseline that is trained with pure MLE loss for 2000 iterations.
-- Run `python2 main.py --pretrain_g_epochs 1000 --total_epochs 1000 --log_dir logs/train/pretrain_n_seqgan  --eval_log_dir logs/eval/with_seqgan`
-- Run `tensorboard --logdir logs/eval/` and open your browser to check the improvement that SeqGAN provided.
+- Run 
+```
+python2 main.py --pretrain_g_epochs 2000 --total_epochs 0 --log_dir logs/train/pure_pretrain --eval_log_dir logs/eval/pure_pretrain
+```
+to have a baseline that is trained with pure MLE loss for 2000 iterations.
+- Run 
+```
+python2 main.py --pretrain_g_epochs 1000 --total_epochs 1000 --log_dir logs/train/pretrain_n_seqgan  --eval_log_dir logs/eval/with_seqgan
+```
+- Run 
+```
+tensorboard --logdir logs/eval/
+```
+and open your browser to check the improvement that SeqGAN provided.
 
 ### Music generation
 
